@@ -30,14 +30,12 @@ do
 
 		-- Check if the tradeskill is loaded
 		-- Has to have recipes and begin with a header
-		local NRecipes = GetNumTradeSkills()
-		if NRecipes==0 or select(2,GetTradeSkillInfo(1))~="header" then
-			return
-		end
-
-		local tradeskillName = GetTradeSkillLine()
+		local numRecipes  = GetNumTradeSkills()
+		local firstRecipe = GetFirstTradeSkill()
+		if numRecipes == 0 or not firstRecipe then return end
 
 		-- Check if the pseudo tradeskills have to be added
+		local tradeskillName = GetTradeSkillLine()
 		if tradeskillName == GetSpellInfo(25229) then -- Jewelcrafting
 			if not A.ProspectingDataLoaded then
 				for itemID,data in pairs(A.ProspectingData) do
@@ -54,59 +52,57 @@ do
 			end
 		end
 
-		local lastHeader
+		local _, lastHeader, craftedItem, skillName, skillType, serviceType
 		local isScanCorrect = true
-		for i = 1,NRecipes do
+		for i = firstRecipe, numRecipes do
 			-- skillName, skillType, numAvailable, isExpanded, serviceType, numSkillUps = GetTradeSkillInfo(index)
 			-- serviceType is nil if the recipe creates an item
-			local skillName, skillType, _, _, serviceType = GetTradeSkillInfo(i)
-			if not skillName then return end
+			skillName, skillType, _, _, serviceType = GetTradeSkillInfo(i)
+			craftedItem = GetTradeSkillItemLink(i)
 
-			-- Save the name of the header
-			if skillType and skillType == "header" then
+			if not skillType or not skillName then
+				return
+			elseif skillType == "header" or skillType == "subheader" then
+				-- Save the name of the header
 				lastHeader = skillName
-
-			-- Analyse recipe
-			elseif skillType and skillType ~= "header" and serviceType==nil then
+			elseif craftedItem then
+				-- recipe creates an item
 				local isRecipeCorrect = true
 
 				-- item ID
-				local itemID = A.link2ID(GetTradeSkillItemLink(i))
-				if not itemID then isRecipeCorrect = false; end
+				local itemID = A.link2ID(craftedItem)
+				if not itemID then isRecipeCorrect = false end
 
-				local numReagents = GetTradeSkillNumReagents(i)
-				if not numReagents then isRecipeCorrect = false; end
+				local numReagents = GetTradeSkillNumReagents(i) or 0
+				local reagentID, reagentCount, subReagentID, subReagentCount
 
-				local reagentID, reagentCount
-				if numReagents==1 then
-					-- reagent ID
+				if numReagents == 1 then
 					reagentID = A.link2ID(GetTradeSkillReagentItemLink(i, 1))
-					if not reagentID then isRecipeCorrect = false; end
+					_, _, reagentCount = GetTradeSkillReagentInfo(i, 1)
 
-					-- reagent number needed
-					reagentCount = select(3,GetTradeSkillReagentInfo(i, 1))
-					if not reagentCount then isRecipeCorrect = false; end
+					if not reagentCount or not reagentID then isRecipeCorrect = false end
 				else
 					-- no reagentID (is already nil)
-					--reagentID = nil
-
 					-- contains data for the whole reagents
 					reagentCount = {}
-					for j = 1,numReagents do
-						local id = A.link2ID(GetTradeSkillReagentItemLink(i, j))
-						local num = select(3,GetTradeSkillReagentInfo(i, j))
-						if not id or not num then isRecipeCorrect = false; break; end
-						tinsert(reagentCount,{id, num})
+					for j = 1, numReagents do
+						subReagentID = A.link2ID( GetTradeSkillReagentItemLink(i, j) )
+						_, _, subReagentCount = GetTradeSkillReagentInfo(i, j)
+						if not subReagentID or not subReagentCount then
+							isRecipeCorrect = false
+							break
+						end
+						tinsert(reagentCount, {subReagentID, subReagentCount})
 					end
 				end
 
 				-- number of reagent created by the recipe
 				local minMade, maxMade = GetTradeSkillNumMade(i)
-				if not minMade or not maxMade then isRecipeCorrect = false; end
+				if not minMade or not maxMade then isRecipeCorrect = false end
 
 				-- recipe link (for tooltips)
 				local recipeLink = GetTradeSkillRecipeLink(i)
-				if not recipeLink then isRecipeCorrect = false; end
+				if not recipeLink then isRecipeCorrect = false end
 
 				if not isRecipeCorrect then
 					isScanCorrect = false
@@ -137,14 +133,14 @@ do
 					-- Cache the data
 					if addSpell then
 						local spell = {reagentID,reagentCount,minMade,maxMade}
-						spell.skillName = skillName
-						spell.tradeskillName = tradeskillName
-						spell.spellLink = recipeLink
-						spell.header = lastHeader
+							  spell.skillName = skillName
+							  spell.tradeskillName = tradeskillName
+							  spell.spellLink = recipeLink
+							  spell.header = lastHeader
 						tinsert(A.data[itemID],spell)
 					end
 				end -- if
-			end -- if
+			end
 		end -- for
 		-- the scanning is complete
 		return isScanCorrect
