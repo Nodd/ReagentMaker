@@ -111,14 +111,14 @@ function A:Initialize()
 	end -- for
 
 	-- Secondary Tooltip
-	A.tooltipRecipe = CreateFrame("GameTooltip", "ReagentMaker_tooltipRecipe",UIParent, "GameTooltipTemplate")
+	A.tooltipRecipe = CreateFrame("GameTooltip", "ReagentMaker_tooltipRecipe", UIParent, "GameTooltipTemplate")
 	A.tooltipRecipe:SetFrameStrata("TOOLTIP")
 	A.tooltipRecipe:Hide()
 
 	-- Used for the campfire button only
 	A.EventsFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 	A.EventsFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-	
+
 	-- Button for enchanting directy on a scroll
 	A.LoadEnchantOnScroll()
 end -- function
@@ -237,7 +237,7 @@ function A.updateCount_throttle(self,event)
 	end
 	t_throttleCount = SCAN_DELAY
 	CountThrottleFrame:SetScript("OnUpdate", throttleCount)
-	
+
 	A.MenuFrame.updateCounts()
 end
 CountThrottleFrame:SetScript("OnEvent", A.updateCount_throttle)

@@ -29,7 +29,7 @@ local function CheckButtonAvailable(arg1)
 		btn:Hide()
 		return
 	end
-	
+
 	-- Check that there's scrolls in the bags
 	local itemCount = GetItemCount(SCROLL_ID)
 	if not itemCount or itemCount==0 then
@@ -39,7 +39,7 @@ local function CheckButtonAvailable(arg1)
 		return
 	end
 	btn:SetText(A.L["Enchant a scroll (%d)"]:format(itemCount))
-	
+
 	if numAvailable==0 then
 		btn:Disable()
 		btn:Show()
@@ -60,11 +60,17 @@ function A.LoadEnchantOnScroll()
 	btn:SetPoint("TOPRIGHT",TradeSkillCreateButton,"TOPLEFT",0,0)
 	btn:SetText(A.L["Enchant on a scroll"])
 	btn:Show()
-	
+
+	local currentTradeSkill = GetTradeSkillLine()
+	local enchanting = GetSpellInfo(ENCHANTING_ID)
+	if currentTradeSkill ~= enchanting then
+		btn:Hide()
+	end
+
 	btn:SetScript("OnClick",function()
 		-- from http://wowprogramming.com/utils/xmlbrowser/live/AddOns/Blizzard_TradeSkillUI/Blizzard_TradeSkillUI.xml
 		DoTradeSkill(TradeSkillFrame.selectedSkill,1)
-		
+
 		-- From GnomeWorks/ScrollMaking.lua
 		UseItemByName(SCROLL_ID)
 	end)
