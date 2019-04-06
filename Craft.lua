@@ -30,27 +30,22 @@ local DoTradeSkill = DoTradeSkill
 ---------------------------------------------------
 -- Function run after selecting a item in the tradeskill window
 -- It only "prefilters" the possibilities
-function A.ProcessReagent(btn)
+function A.ProcessReagent(reagentButton)
+	print("craft")
+	info = A.ReagentButtonInfo(reagentButton)
+
 	-- Do not manage guild or linked tradeskill
-	if IsTradeSkillGuild() or IsTradeSkillLinked() then return end
+	if not info.recipeIDs then return end
 
 	-- We want no modifiers, or shift to choose the number of reagent to craft
 	if IsModifierKeyDown() and not IsShiftKeyDown() then return end
 	local chooseNumberToCraft = IsShiftKeyDown()
 
-	-- Index of the reagent in the recipe, taken from the button name
-	local reagentIndexInRecipe = A.buttonNumber(btn)
-
-	-- ID of the reagent we want to craft
-	local recipeIndex = GetTradeSkillSelectionIndex()
-	local reagentID = A.link2ID(GetTradeSkillReagentItemLink(recipeIndex, reagentIndexInRecipe))
-
-	-- Continue only if the reagent is known
-	if not reagentID or not A.data[reagentID] then return end
-
 	-- If only one recipe is known for the reagent and it is an actual recipe, use it
-	if #(A.data[reagentID]) == 1 and not A.data[reagentID][1].macro then
-		A.CraftItemWithRecipe(recipeIndex,reagentID,A.data[reagentID][1],reagentIndexInRecipe,chooseNumberToCraft,btn)
+	if info.recipeID then -- and not recipeIDs[1].macro then
+		amount = 1
+		C_TradeSkillUI.CraftRecipe(info.recipeID, amount)
+		--A.CraftItemWithRecipe(recipeIndex,reagentID,recipeIDs[1],reagentIndexInRecipe,chooseNumberToCraft,btn)
 
 	else -- Many recipes are known for this item, or it is not a standard tradeskill display them all
 		A.externalCraftWindow(reagentID,reagentIndexInRecipe)
@@ -59,15 +54,16 @@ end -- function
 
 -- Launch the procedure for a standard recipe
 -- Can be called from the external window
-function A.CraftItemWithRecipe(recipeIndex,reagentID,recipeData,reagentIndexInRecipe,chooseNumberToCraft,btn)
+function A.CraftItemWithRecipe(recipeID,reagentID,recipeData,reagentIndexInRecipe,chooseNumberToCraft,btn)
 	-- Check that it's the same tradeskill
-	if recipeData.tradeskillName ~= GetTradeSkillLine() then
-		A.Error(A.L["The recipe to make this reagent is in another tradeskill. Currently ReagentMaker can not manage such a case, sorry."])
-		return
-	end
+	--if recipeData.tradeskillName ~= GetTradeSkillLine() then
+	--	A.Error(A.L["The recipe to make this reagent is in another tradeskill. Currently ReagentMaker can not manage such a case, sorry."])
+	--	return
+	--end
 
 	-- Check how many times the recipe is makable
-	local numMakable = A.numRecipeMakable(recipeData[1],recipeData[2])
+	local recipeInfo = C_TradeSkillUI.GetRecipeInfo(recipeID)
+	local numMakable = recipeInfo.numAvailable
 	if not numMakable then
 		A.Error(SPELL_FAILED_ERROR)
 		return
@@ -112,6 +108,29 @@ function A.CraftItemWithRecipe(recipeIndex,reagentID,recipeData,reagentIndexInRe
 		A.DoCraft(reagentID,recipeData,numToMake)
 	end -- if
 end
+
+-- Gives the total number of craftable items
+function A.numMakable(reagentItemID)
+	local recipeIDs = A.data[reagentItemID]
+
+	-- No recipe
+	if not recipeIDs then return nil, nil, nil end
+
+	-- Many recipes
+	local craftableMin = 0
+	local craftableMax = 0
+	local isApprox = false
+	local recipeInfo = {}
+	for _, recipeID in ipairs(recipeIDs) do
+		-- number of times the recipe is makable
+		C_TradeSkillUI.GetRecipeInfo(recipeID, recipeInfo)
+		local numAvailable = recipeInfo.numAvailable
+		local minMade, maxMade = C_TradeSkillUI.GetRecipeNumItemsProduced(recipeID)
+		craftableMin = craftableMin + minMade * numAvailable
+		craftableMax = craftableMax + minMade * numAvailable
+	end -- for
+	return craftableMin, craftableMax, isApprox
+end -- function
 
 -- Compute optimal number of items to craft
 function A.numToMake(recipeIndex, reagentIndexInRecipe,numReagentMakable,minMade,maxMade)

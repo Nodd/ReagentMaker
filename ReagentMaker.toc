@@ -1,9 +1,9 @@
-## Interface: 40200
+## Interface: 80100
 ## Title: ReagentMaker
 ## Author: Nodd
-## Version: v1.1beta2
+## Version: v1.2alpha0
 ## Notes: Creates reagents easily
-## X-Curse-Packaged-Version: v1.1beta2
+## X-Curse-Packaged-Version: v1.2alpha0
 ## X-Curse-Project-Name: ReagentMaker
 ## X-Curse-Project-ID: reagentmaker
 ## X-Curse-Repository-ID: wow/reagentmaker/mainline
@@ -11,15 +11,15 @@
 localization.lua
 
 CommonData.lua
-ProspectingData.lua
-MillingData.lua
+#ProspectingData.lua
+#MillingData.lua
 
-CampFireButton.lua
+#CampFireButton.lua
 
 utils.lua
 data.lua
 Craft.lua
-SecureMenu.lua
+#SecureMenu.lua
 ReagentMaker.lua
 
-EnchantOnScroll.lua
+#EnchantOnScroll.lua

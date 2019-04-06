@@ -43,7 +43,8 @@ MenuFrame:SetScript("OnLeave",function()
 end)
 
 -- Hide frame when selecting a recipe which doesn't need this reagent
-hooksecurefunc("SelectTradeSkill",function()
+--hooksecurefunc(TradeSkillFrame.RecipeList, "OnRecipeButtonClicked", function(self, info, button)
+function MenuFrame.checkHide()
 	local selectedIndex = GetTradeSkillSelectionIndex()
 	for reagentIndexInRecipe = 1,GetTradeSkillNumReagents(selectedIndex) do
 		local reagentID = A.link2ID(GetTradeSkillReagentItemLink(selectedIndex, reagentIndexInRecipe))
@@ -52,7 +53,7 @@ hooksecurefunc("SelectTradeSkill",function()
 		end
 	end
 	MenuFrame:Hide()
-end)
+end
 A.MenuFrame = MenuFrame
 
 -- Background adaptable vertically
