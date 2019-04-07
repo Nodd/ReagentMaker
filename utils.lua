@@ -3,15 +3,15 @@ local addonName, A = ...
 -- GLOBALS: UIErrorsFrame, UIErrorsFrame_OnEvent
 
 -- Messages to the user
-function A.Warn(msg)
+function A.Warn(message)
 	if not msg then return end
 	local event = "UI_INFO_MESSAGE"
-	UIErrorsFrame_OnEvent(UIErrorsFrame, event, msg)
+	UIErrorsFrame:TryDisplayMessage(messageType, message, r, g, b)
 end -- function
-function A.Error(msg)
+function A.Error(message)
 	if not msg then return end
 	local event = "UI_ERROR_MESSAGE"
-	UIErrorsFrame_OnEvent(UIErrorsFrame, event, msg)
+	UIErrorsFrame:TryDisplayMessage(messageType, message, r, g, b)
 end -- function
 
 -- Returns the item ID from its link
@@ -32,7 +32,7 @@ function A.ReagentButtonInfo(reagentButton)
 	if not A.IsPlayerTradeSkill() then return info end
 
 	-- Index of the reagent in the recipe
-	info.reagentIndexInRecipe = reagentButton.reagentIndex
+	info.reagentIndex = reagentButton.reagentIndex
 
 	-- Selected recipe
 	info.selectedRecipeID = TradeSkillFrame.DetailsFrame.selectedRecipeID
@@ -40,7 +40,7 @@ function A.ReagentButtonInfo(reagentButton)
 	-- ID of the reagent we want to craft
 	info.reagentItemLink = C_TradeSkillUI.GetRecipeReagentItemLink(
 		info.selectedRecipeID,
-		info.reagentIndexInRecipe)
+		info.reagentIndex)
 	info.reagentItemID = A.link2ID(info.reagentItemLink)
 
 	-- Continue only if the reagent is known
@@ -62,7 +62,7 @@ function A.ReagentInfo(recipeID, reagentIndex)
 
 	info.reagentItemLink = C_TradeSkillUI.GetRecipeReagentItemLink(
 		info.selectedRecipeID,
-		info.reagentIndexInRecipe)
+		info.reagentIndex)
 	info.reagentItemID = A.link2ID(info.reagentItemLink)
 
 	-- Continue only if the reagent is known

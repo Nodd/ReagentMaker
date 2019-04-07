@@ -9,16 +9,10 @@ local max = math.max
 local floor = math.floor
 
 -- Wow functions
-local IsTradeSkillGuild = IsTradeSkillGuild
-local IsTradeSkillLinked = IsTradeSkillLinked
+local C_TradeSkillUI = C_TradeSkillUI
 local IsModifierKeyDown = IsModifierKeyDown
 local IsShiftKeyDown = IsShiftKeyDown
-local GetTradeSkillSelectionIndex = GetTradeSkillSelectionIndex
-local GetTradeSkillReagentItemLink = GetTradeSkillReagentItemLink
-local GetTradeSkillReagentInfo = GetTradeSkillReagentInfo
-local GetTradeSkillLine = GetTradeSkillLine
 local GetItemInfo = GetItemInfo
-local DoTradeSkill = DoTradeSkill
 
 --SPELL_FAILED_REAGENTS = "Missing reagent: %s";
 --ERR_SPELL_FAILED_REAGENTS_GENERIC = "Missing reagent";
@@ -29,32 +23,31 @@ local DoTradeSkill = DoTradeSkill
 -- Craft items
 ---------------------------------------------------
 -- Function run after selecting a item in the tradeskill window
--- It only "prefilters" the possibilities
 function A.ProcessReagent(reagentButton)
-	print("craft")
-	info = A.ReagentButtonInfo(reagentButton)
+	local reagentInfo = A.ReagentButtonInfo(reagentButton)
 
-	-- Do not manage guild or linked tradeskill
-	if not info.recipeIDs then return end
+	-- Abort if this reagant is not managed
+	if not reagentInfo.recipeIDs then return end
 
-	-- We want no modifiers, or shift to choose the number of reagent to craft
+	-- We want either no modifiers, or shift to choose the number of reagent to
+	-- craft
 	if IsModifierKeyDown() and not IsShiftKeyDown() then return end
 	local chooseNumberToCraft = IsShiftKeyDown()
 
 	-- If only one recipe is known for the reagent and it is an actual recipe, use it
-	if info.recipeID then -- and not recipeIDs[1].macro then
-		amount = 1
-		C_TradeSkillUI.CraftRecipe(info.recipeID, amount)
-		--A.CraftItemWithRecipe(recipeIndex,reagentID,recipeIDs[1],reagentIndexInRecipe,chooseNumberToCraft,btn)
+	if reagentInfo.recipeID then -- and not recipeIDs[1].macro then
+		--amount = 1
+		--C_TradeSkillUI.CraftRecipe(info.recipeID, amount)
+		A.CraftItemWithRecipe(reagentInfo, chooseNumberToCraft, reagentButton)
 
-	else -- Many recipes are known for this item, or it is not a standard tradeskill display them all
-		A.externalCraftWindow(reagentID,reagentIndexInRecipe)
+	--else -- Many recipes are known for this item, or it is not a standard tradeskill display them all
+	--	A.externalCraftWindow(reagentID,reagentIndex)
 	end -- if
 end -- function
 
 -- Launch the procedure for a standard recipe
 -- Can be called from the external window
-function A.CraftItemWithRecipe(recipeID,reagentID,recipeData,reagentIndexInRecipe,chooseNumberToCraft,btn)
+function A.CraftItemWithRecipe(reagentInfo, chooseNumberToCraft, reagentButton)
 	-- Check that it's the same tradeskill
 	--if recipeData.tradeskillName ~= GetTradeSkillLine() then
 	--	A.Error(A.L["The recipe to make this reagent is in another tradeskill. Currently ReagentMaker can not manage such a case, sorry."])
@@ -62,19 +55,16 @@ function A.CraftItemWithRecipe(recipeID,reagentID,recipeData,reagentIndexInRecip
 	--end
 
 	-- Check how many times the recipe is makable
-	local recipeInfo = C_TradeSkillUI.GetRecipeInfo(recipeID)
-	local numMakable = recipeInfo.numAvailable
-	if not numMakable then
-		A.Error(SPELL_FAILED_ERROR)
-		return
-	end
+	local recipeInfo = C_TradeSkillUI.GetRecipeInfo(reagentInfo.recipeID)
+	local numReagentRecipeMakable = recipeInfo.numAvailable
 
-	if numMakable<=0 then
+	--[[
+	if numReagentRecipeMakable<=0 then
 		-- If not makable, try a one-step recursion
 		-- enables e.g. to mill to create an ink
 		-- need a unique reagent
-		if recipeData[1] and A.data[recipeData[1]] then
-			if A.externalCraftWindow(recipeData[1],reagentIndexInRecipe,reagentID) ~= false then
+		if A.data[reagentItemID] then
+			if A.externalCraftWindow(recipeData[1],reagentIndex,reagentID) ~= false then
 				-- there was no problem opening the external window
 				return
 			end
@@ -85,18 +75,20 @@ function A.CraftItemWithRecipe(recipeID,reagentID,recipeData,reagentIndexInRecip
 		A.Error(A.L["You do not have enough reagents to craft [%s]"]:format(GetItemInfo(reagentID) or "item #"..reagentID))
 		return
 	end
+	--]]
 
 	-- Optimal number of items to craft
-	local numToMake = A.numToMake(recipeIndex, reagentIndexInRecipe,numMakable, recipeData[3], recipeData[4])
+	local numToMake = A.numToMake(reagentInfo, numReagentRecipeMakable)
+	if not numToMake then return end
 
 	-- Choose number or craft directly
 	if chooseNumberToCraft then
 		-- Store info to be able to run the function later
-		btn.ReagentMaker_reagentID = reagentID
-		btn.ReagentMaker_recipeData = recipeData
+		reagentButton.ReagentMaker_reagentID = reagentID
+		reagentButton.ReagentMaker_recipeData = recipeData
 
 		-- Open dialog
-		OpenStackSplitFrame(numMakable, btn, "TOP", "BOTTOM")
+		OpenStackSplitFrame(numMakable, reagentButton, "TOP", "BOTTOM")
 
 		-- Fill in the number to make
 		numToMake = tostring(numToMake)
@@ -105,7 +97,8 @@ function A.CraftItemWithRecipe(recipeID,reagentID,recipeData,reagentIndexInRecip
 		end
 		StackSplitFrame.typing = 0 -- reinit the frame so that the entered value will be erased on text entry
 	else
-		A.DoCraft(reagentID,recipeData,numToMake)
+		-- Craft the item, finally !
+		C_TradeSkillUI.CraftRecipe(recipeInfo.recipeID, numToMake)
 	end -- if
 end
 
@@ -132,27 +125,30 @@ function A.numMakable(reagentItemID)
 	return craftableMin, craftableMax, isApprox
 end -- function
 
--- Compute optimal number of items to craft
-function A.numToMake(recipeIndex, reagentIndexInRecipe,numReagentMakable,minMade,maxMade)
-	-- Look at how many we need to make one item for the selected recipe
-	local numToMake = 1
-	local _, _, reagentCount, playerReagentCount = GetTradeSkillReagentInfo(recipeIndex, reagentIndexInRecipe)
-	-- make enough reagents to craft one more item
-	numToMake = min(floor(playerReagentCount/reagentCount+1)*reagentCount-playerReagentCount,numReagentMakable)
+-- Compute optimal number of reagents to craft
+function A.numToMake(reagentInfo, numReagentRecipeMakable)
+	-- Look at how many reagent we need to make one item of the selected recipe
+	local _, _, reagentCount, playerReagentCount = C_TradeSkillUI.GetRecipeReagentInfo(
+		reagentInfo.selectedRecipeID,
+		reagentInfo.reagentIndex)
+
+	-- Enough reagents to craft one more item
+	local numReagentToMake = reagentCount - (playerReagentCount % reagentCount)
 
 	-- take into account that some recipe craft more than one item
 	-- use the mean between min and max, but make at least one...
-	if not minMade then
-		minMade = 1
-	elseif minMade<1 then
-		-- from the percentage, compute the mean number of crafts to make
-		minMade = 1/minMade
+	local minMade, maxMade = C_TradeSkillUI.GetRecipeNumItemsProduced(reagentInfo.recipeID)
+	local meanMade = (minMade + maxMade) / 2
+	numRecipeToMake = floor(numReagentToMake / meanMade) -- floor() to not waste reagents
+	numRecipeToMake = max(numRecipeToMake, 1) -- Make at least one
+	if numRecipeToMake > numReagentRecipeMakable then
+		UIErrorsFrame:TryDisplayMessage(
+			LE_GAME_ERR_SPELL_FAILED_REAGENTS,
+			A.L["Unable to make enough reagent for one more recipe."],
+			1, 0, 0)
+		numRecipeToMake = nil
 	end
-	if not maxMade then
-		maxMade = minMade
-	end
-	numToMake = max(floor(2*numToMake/(maxMade+minMade)),1)
-	return numToMake
+	return numRecipeToMake
 end
 
 -- function used after choosing the number of reagent to craft
@@ -160,26 +156,4 @@ function A.SplitStack(owner,split)
 	A.DoCraft(owner.ReagentMaker_reagentID,owner.ReagentMaker_recipeData,split)
 	owner.ReagentMaker_reagentID = nil
 	owner.ReagentMaker_recipeData = nil
-end
-
--- Find the recipe and do the crafting
-function A.DoCraft(reagentID,recipeData,numToMake)
-	-- Remove filters
-	A.SaveActiveFilters(recipeData.header)
-
-	-- Find recipe index
-	local reagentIndex = A.findExactSkillIndex(reagentID,recipeData.spellLink)
-
-	-- Error if not found
-	if not reagentIndex then
-		A.Error(A.L["The recipe to make the reagent seems to be hidden, it is not makable. Try to remove the filters on the recipes."])
-		A.RestoreActiveFilters()
-		return
-	end
-
-	-- Craft the item, finally !
-	DoTradeSkill(reagentIndex,numToMake)
-
-	-- Restore Filters
-	A.RestoreActiveFilters()
 end

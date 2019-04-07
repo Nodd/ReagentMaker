@@ -130,8 +130,8 @@ function A:UpdateCounts()
 	local recipeID = TradeSkillFrame.DetailsFrame.selectedRecipeID
 
 	-- Count makable items and show it
-	for reagentIndexInRecipe = 1, C_TradeSkillUI.GetRecipeNumReagents(recipeID) do
-		local reagentButton = TradeSkillFrame.DetailsFrame.Contents.Reagents[reagentIndexInRecipe]
+	for reagentIndex = 1, C_TradeSkillUI.GetRecipeNumReagents(recipeID) do
+		local reagentButton = TradeSkillFrame.DetailsFrame.Contents.Reagents[reagentIndex]
 		local countLabel = reagentButton.label
 		if not A.IsPlayerTradeSkill() then
 			countLabel:Hide()
