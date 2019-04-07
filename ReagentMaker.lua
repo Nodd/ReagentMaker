@@ -35,6 +35,7 @@ A.EventsFrame:SetScript("OnEvent", function(self, event)
 
 	elseif event == "TRADE_SKILL_LIST_UPDATE" then
 		A:ScanCurrentTradeskill()
+		A:UpdateCounts()
 
 	elseif event == "TRADE_SKILL_SHOW" then
 		A:Initialize()
@@ -109,9 +110,9 @@ function A.btnEntered(reagentButton)
 	end
 
 	-- Tooltips
-	if info.recipeLink then
+	if info.link then
 		A.tooltipRecipe:SetOwner(reagentButton)
-		A.tooltipRecipe:SetHyperlink(info.recipeLink)
+		A.tooltipRecipe:SetHyperlink(info.link)
 		A.tooltipRecipe:Show()
 		A.tooltipRecipe:ClearAllPoints()
 		A.tooltipRecipe:SetPoint("BOTTOMLEFT",GameTooltip,"BOTTOMRIGHT")

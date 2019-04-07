@@ -35,13 +35,11 @@ function A.ProcessReagent(reagentButton)
 	local chooseNumberToCraft = IsShiftKeyDown()
 
 	-- If only one recipe is known for the reagent and it is an actual recipe, use it
-	if reagentInfo.recipeID then -- and not recipeIDs[1].macro then
-		--amount = 1
-		--C_TradeSkillUI.CraftRecipe(info.recipeID, amount)
+	if reagentInfo.recipeID then
 		A.CraftItemWithRecipe(reagentInfo, chooseNumberToCraft, reagentButton)
 
-	--else -- Many recipes are known for this item, or it is not a standard tradeskill display them all
-	--	A.externalCraftWindow(reagentID,reagentIndex)
+	else -- Many recipes are known for this item, or it is not a standard tradeskill display them all
+		A.externalCraftWindow(reagentID, reagentIndex)
 	end -- if
 end -- function
 
@@ -116,11 +114,19 @@ function A.numMakable(reagentItemID)
 	local recipeInfo = {}
 	for _, recipe in ipairs(recipes) do
 		-- number of times the recipe is makable
-		C_TradeSkillUI.GetRecipeInfo(recipe.recipeID, recipeInfo)
-		local numAvailable = recipeInfo.numAvailable
-		local minMade, maxMade = C_TradeSkillUI.GetRecipeNumItemsProduced(recipe.recipeID)
+		local numAvailable, minMade, maxMade
+		if recipe.recipeID then
+			C_TradeSkillUI.GetRecipeInfo(recipe.recipeID, recipeInfo)
+			numAvailable = recipeInfo.numAvailable
+			minMade, maxMade = C_TradeSkillUI.GetRecipeNumItemsProduced(recipe.recipeID)
+		elseif recipe.spellID then
+			minMade = recipe.numOut
+			maxMade = recipe.numOut
+			local count = GetItemCount(recipe.reagentID, true) -- includeBank
+			numAvailable = floor(count / recipe.numIn)
+		end
 		craftableMin = craftableMin + minMade * numAvailable
-		craftableMax = craftableMax + minMade * numAvailable
+		craftableMax = craftableMax + maxMade * numAvailable
 	end -- for
 	return craftableMin, craftableMax, isApprox
 end -- function

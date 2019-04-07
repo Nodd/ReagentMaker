@@ -50,7 +50,12 @@ function A.ReagentButtonInfo(reagentButton)
 	-- Check if the item is made by only one recipe. If not, return
 	if #(info.recipes) > 1 then return info end
 	info.recipeID = info.recipes[1].recipeID
-	info.recipeLink = C_TradeSkillUI.GetRecipeLink(info.recipeID)
+	info.spellID = info.recipes[1].spellID
+	if info.recipeID then
+		info.link = C_TradeSkillUI.GetRecipeLink(info.recipeID)
+	elseif info.recipes[1].spellLink then
+		info.link = info.recipes[1].spellLink
+	end
 
 	return info
 end
