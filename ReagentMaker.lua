@@ -138,7 +138,7 @@ function A:UpdateCounts()
 		else
 			info = A.ReagentButtonInfo(reagentButton)
 
-			if not info.recipeIDs then
+			if not info.recipes then
 				countLabel:Hide()
 			else
 				-- Count and show

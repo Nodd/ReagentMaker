@@ -45,11 +45,11 @@ function A.ReagentButtonInfo(reagentButton)
 
 	-- Continue only if the reagent is known
 	if not info.reagentItemID or not A.data[info.reagentItemID] then return info end
-	info.recipeIDs = A.data[info.reagentItemID]
+	info.recipes = A.data[info.reagentItemID]
 
 	-- Check if the item is made by only one recipe. If not, return
-	if #(info.recipeIDs) > 1 then return info end
-	info.recipeID = info.recipeIDs[1]
+	if #(info.recipes) > 1 then return info end
+	info.recipeID = info.recipes[1].recipeID
 	info.recipeLink = C_TradeSkillUI.GetRecipeLink(info.recipeID)
 
 	return info
@@ -67,11 +67,11 @@ function A.ReagentInfo(recipeID, reagentIndex)
 
 	-- Continue only if the reagent is known
 	if not info.reagentItemID or not A.data[info.reagentItemID] then return info end
-	info.recipeIDs = A.data[info.reagentItemID]
+	info.recipes = A.data[info.reagentItemID]
 
 	-- Check if the item is made by only one recipe. If not, return
-	if #(info.recipeIDs) > 1 then return info end
-	info.recipeID = info.recipeIDs[1]
+	if #(info.recipes) > 1 then return info end
+	info.recipeID = info.recipes[1].recipeID
 	info.recipeLink = C_TradeSkillUI.GetRecipeLink(info.recipeID)
 
 	return info

@@ -27,7 +27,7 @@ function A.ProcessReagent(reagentButton)
 	local reagentInfo = A.ReagentButtonInfo(reagentButton)
 
 	-- Abort if this reagant is not managed
-	if not reagentInfo.recipeIDs then return end
+	if not reagentInfo.recipes then return end
 
 	-- We want either no modifiers, or shift to choose the number of reagent to
 	-- craft
@@ -104,21 +104,21 @@ end
 
 -- Gives the total number of craftable items
 function A.numMakable(reagentItemID)
-	local recipeIDs = A.data[reagentItemID]
+	local recipes = A.data[reagentItemID]
 
 	-- No recipe
-	if not recipeIDs then return nil, nil, nil end
+	if not recipes then return nil, nil, nil end
 
 	-- Many recipes
 	local craftableMin = 0
 	local craftableMax = 0
 	local isApprox = false
 	local recipeInfo = {}
-	for _, recipeID in ipairs(recipeIDs) do
+	for _, recipe in ipairs(recipes) do
 		-- number of times the recipe is makable
-		C_TradeSkillUI.GetRecipeInfo(recipeID, recipeInfo)
+		C_TradeSkillUI.GetRecipeInfo(recipe.recipeID, recipeInfo)
 		local numAvailable = recipeInfo.numAvailable
-		local minMade, maxMade = C_TradeSkillUI.GetRecipeNumItemsProduced(recipeID)
+		local minMade, maxMade = C_TradeSkillUI.GetRecipeNumItemsProduced(recipe.recipeID)
 		craftableMin = craftableMin + minMade * numAvailable
 		craftableMax = craftableMax + minMade * numAvailable
 	end -- for
