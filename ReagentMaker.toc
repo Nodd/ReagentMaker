@@ -22,4 +22,4 @@ Craft.lua
 #SecureMenu.lua
 ReagentMaker.lua
 
-#EnchantOnScroll.lua
+EnchantOnScroll.lua

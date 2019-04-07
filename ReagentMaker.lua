@@ -35,6 +35,8 @@ A.EventsFrame:SetScript("OnEvent", function(self, event)
 
 	elseif event == "TRADE_SKILL_LIST_UPDATE" then
 		A:ScanCurrentTradeskill()
+
+	elseif event == "UPDATE_TRADESKILL_RECAST" then
 		A:UpdateCounts()
 
 	elseif event == "TRADE_SKILL_SHOW" then
@@ -44,6 +46,7 @@ A.EventsFrame:SetScript("OnEvent", function(self, event)
 end) -- function
 A.EventsFrame:RegisterEvent("TRADE_SKILL_SHOW")
 A.EventsFrame:RegisterEvent("TRADE_SKILL_LIST_UPDATE")
+A.EventsFrame:RegisterEvent("UPDATE_TRADESKILL_RECAST")
 --A.EventsFrame:RegisterAllEvents()
 
 
@@ -87,7 +90,7 @@ function A:Initialize()
 	--A.EventsFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 
 	-- Button for enchanting directy on a scroll
-	--A.LoadEnchantOnScroll()
+	A.LoadEnchantOnScroll()
 
 	hooksecurefunc(
 		TradeSkillFrame.RecipeList,
