@@ -38,6 +38,7 @@ A.EventsFrame:SetScript("OnEvent", function(self, event)
 
 	elseif event == "UPDATE_TRADESKILL_RECAST" then
 		A:UpdateCounts()
+		A.ManageCampFireBtn()
 
 	elseif event == "TRADE_SKILL_SHOW" then
 		A:Initialize()

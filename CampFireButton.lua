@@ -1,7 +1,7 @@
 local addonName, A = ...
 
 local CAMPFIRE_ID = 818
-local COOKING_ID = 2550
+local COOKING_ID = 2548
 local btn
 local cookingName
 local CooldownFrame_SetTimer = CooldownFrame_SetTimer
@@ -18,14 +18,14 @@ end
 
 -- Create button
 function A.InitialiseCampFireBtn()
-	if not GetTradeSkillLine() or InCombatLockdown() then return end
+	if not C_TradeSkillUI.GetTradeSkillLine() or InCombatLockdown() then return end
 
 	-- Create the frame
 	btn = CreateFrame("Button", nil, TradeSkillFrame, "SecureActionButtonTemplate")
 	btn:SetNormalTexture(select(3,GetSpellInfo(CAMPFIRE_ID)))
 	btn:SetHighlightTexture("Interface\\BUTTONS\\ButtonHilight-Square")
-	btn:SetSize(24,24)
-	btn:SetPoint("BOTTOMRIGHT",TradeSkillFrame,"BOTTOMRIGHT",-10,179)
+	btn:SetSize(32,32)
+	btn:SetPoint("BOTTOMRIGHT",TradeSkillFrame,"BOTTOMRIGHT",-30,30)
 
 	-- Set the action
 	btn:SetAttribute("type", "spell")
@@ -40,27 +40,21 @@ function A.InitialiseCampFireBtn()
 	btn:SetScript("OnLeave",function() GameTooltip:Hide(); end)
 
 	-- Add cooldown
-	btn.cooldown = CreateFrame("Cooldown",nil,btn)
+	btn.cooldown = CreateFrame("Cooldown",nil,btn, "CooldownFrameTemplate")
 	btn.cooldown:SetAllPoints(btn)
 
 	-- Check if recipe failed due to lack of campfire
 	local campfireName = GetSpellInfo(CAMPFIRE_ID)
-	local errorMsg
 	btn:SetScript("OnEvent",function(self,event,arg1,arg2)
-		if not errorMsg or errorMsg==LOCKED_WITH_ITEM then
-			local i = GetTradeSkillSelectionIndex()
-			if i and i>01 then
-				errorMsg = LOCKED_WITH_ITEM:format(GetTradeSkillTools(GetTradeSkillSelectionIndex()))
-			end
-		end
 		if event == "UNIT_SPELLCAST_SUCCEEDED" then
 			if arg1 == "player" and arg2 == campfireName then
 				self:SetScript("OnUpdate",WaitCooldown)
-				--CooldownFrame_SetTimer(self.cooldown,GetSpellCooldown(CAMPFIRE_ID))
+				local start, duration, enabled, modRate = GetSpellCooldown(CAMPFIRE_ID)
+				btn.cooldown:SetCooldown(start, duration, modRate)
 			end
-		elseif arg1 == errorMsg and GetSpellCooldown(CAMPFIRE_ID)==0 then
+		elseif arg1 == 50 and GetSpellCooldown(CAMPFIRE_ID)==0 then
 			-- Flash the button if the user tried to cook something without fire
-			self.cooldown:SetCooldown(0,0)
+			self.cooldown:SetCooldown(1,1)
 		end
 	end)
 end
@@ -76,8 +70,7 @@ end
 -- Show button if applicable
 function A.ManageCampFireBtn()
 	-- Display only if the tradeskill is Cooking
-	if not cookingName then cookingName = GetSpellInfo(COOKING_ID) end
-	if GetTradeSkillLine() ~= cookingName then
+	if C_TradeSkillUI.GetTradeSkillLine() ~= COOKING_ID then
 		if btn then btn:Hide(); btn:UnregisterAllEvents() end
 	else
 		-- create button if necessary
@@ -89,6 +82,7 @@ function A.ManageCampFireBtn()
 		btn:Show()
 		btn:RegisterEvent("UI_ERROR_MESSAGE")
 		btn:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-		CooldownFrame_SetTimer(btn.cooldown,GetSpellCooldown(CAMPFIRE_ID))
+		local start, duration, enabled, modRate = GetSpellCooldown(CAMPFIRE_ID)
+		btn.cooldown:SetCooldown(start, duration, modRate)
 	end
 end

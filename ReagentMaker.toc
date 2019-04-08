@@ -14,7 +14,7 @@ CommonData.lua
 #ProspectingData.lua
 #MillingData.lua
 
-#CampFireButton.lua
+CampFireButton.lua
 
 utils.lua
 data.lua
