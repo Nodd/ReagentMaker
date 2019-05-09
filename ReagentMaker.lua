@@ -133,9 +133,18 @@ end -- function
 function A:UpdateCounts()
 	-- Needs an argument
 	local recipeID = TradeSkillFrame.DetailsFrame.selectedRecipeID
+	if not recipeID then
+		-- May happend while switching tradeskills
+		return
+	end
+	numReagents = C_TradeSkillUI.GetRecipeNumReagents(recipeID)
+	if not numReagents then
+		-- May happend while switching tradeskills
+		return
+	end
 
 	-- Count makable items and show it
-	for reagentIndex = 1, C_TradeSkillUI.GetRecipeNumReagents(recipeID) do
+	for reagentIndex = 1, numReagents do
 		local reagentButton = TradeSkillFrame.DetailsFrame.Contents.Reagents[reagentIndex]
 		local countLabel = reagentButton.label
 		if not A.IsPlayerTradeSkill() then
