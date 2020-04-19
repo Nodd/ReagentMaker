@@ -59,7 +59,12 @@ function A:Initialize()
 	-- Register clics on reagent's buttons
 	for i=1,7 do
 		local reagentButton = TradeSkillFrame.DetailsFrame.Contents.Reagents[i]
-		reagentButton:HookScript("OnDoubleClick", A.ProcessReagent)
+		reagentButton:HookScript("OnMouseDown",
+			function(reagentButton, mouseButton)
+				if (mouseButton == "MiddleButton") then
+					A.ProcessReagent(reagentButton)
+				end
+			end)
 		reagentButton:HookScript("OnEnter", A.btnEntered)
 		reagentButton:HookScript("OnLeave", A.btnLeft)
 		--reagentButton.SplitStack = A.SplitStack
