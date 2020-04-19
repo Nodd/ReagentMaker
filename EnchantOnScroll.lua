@@ -1,7 +1,7 @@
 local addonName, A = ...
 
 local SCROLL_ID = 38682
-local ENCHANTING_SKILL_ID = 2494
+local ENCHANTING_PARENT_SKILL_ID = 333
 local btn
 
 local EventsFrame = CreateFrame("Frame",nil,TradeSkillFrame) -- It will be hidden with the TradeSkillFrame
@@ -15,7 +15,8 @@ local function CheckButtonAvailable(arg1)
 		return
 	end
 	-- Check that we're still with the enchanting tradeskill
-	if C_TradeSkillUI.GetTradeSkillLine() ~= ENCHANTING_SKILL_ID then
+	local _, _, _, _, _, parentSkillLineID, _ = C_TradeSkillUI.GetTradeSkillLine()
+	if parentSkillLineID ~= ENCHANTING_PARENT_SKILL_ID then
 		btn:Hide()
 		return
 	end
@@ -28,8 +29,10 @@ local function CheckButtonAvailable(arg1)
 	end
 
 	-- Check that it's an enchant
+	-- recipeInfo.alternateVerb is set for enchants only
+	-- TODO: use `returnTable` argument for optimisation
 	local recipeInfo = C_TradeSkillUI.GetRecipeInfo(selectedRecipeID)
-	if recipeInfo.alternateVerb ~= "Enchanter" then
+	if not recipeInfo or not recipeInfo.alternateVerb then
 		btn:Hide()
 		return
 	end
