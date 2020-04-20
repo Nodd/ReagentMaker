@@ -39,7 +39,7 @@ function A.ProcessReagent(reagentButton)
 		A.CraftItemWithRecipe(reagentInfo, chooseNumberToCraft, reagentButton)
 
 	else -- Many recipes are known for this item, or it is not a standard tradeskill display them all
-		A.externalCraftWindow(reagentID, reagentIndex)
+		--A.externalCraftWindow(reagentID, reagentIndex)
 	end -- if
 end -- function
 
