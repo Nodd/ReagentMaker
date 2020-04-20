@@ -134,6 +134,15 @@ function A.btnLeft(btn)
 	A.tooltipRecipe:Hide()
 end -- function
 
+local function simpleFloat(number)
+	str = ("%.2f"):format(number)
+	if str:sub(-3,-1) == ".00" then
+		str = str:sub(0, -4)
+	elseif str:sub(-1) == "0" then
+		str = str:sub(0, -2)
+	end
+    return str
+end
 
 function A:UpdateCounts()
 	-- Needs an argument
@@ -168,9 +177,9 @@ function A:UpdateCounts()
 				else
 					local txt = numMakableIsApprox and "~" or ""
 					if numMakableMin == numMakableMax then
-						countLabel:SetFormattedText("%s%.2g",txt,numMakableMin)
+						countLabel:SetFormattedText("%s%s",txt,simpleFloat(numMakableMin))
 					else
-						countLabel:SetFormattedText("%s%.2g-%.2g",txt,numMakableMin,numMakableMax)
+						countLabel:SetFormattedText("%s%s-%s",txt,simpleFloat(numMakableMin),simpleFloat(numMakableMax))
 					end
 					if numMakableMax==0 then
 						countLabel:SetTextColor(1, 0, 0, 1) -- red
