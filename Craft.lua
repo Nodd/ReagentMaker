@@ -119,6 +119,10 @@ function A.numMakable(reagentItemID)
 			C_TradeSkillUI.GetRecipeInfo(recipe.recipeID, recipeInfo)
 			numAvailable = recipeInfo.numAvailable
 			minMade, maxMade = C_TradeSkillUI.GetRecipeNumItemsProduced(recipe.recipeID)
+			-- Hack for recipes from another tradeskill
+			if not minMade then minMade = 0 end
+			if not maxMade then maxMade = 0 end
+			if not numAvailable then numAvailable = 0 end
 		elseif recipe.spellID then
 			minMade = recipe.numOut
 			maxMade = recipe.numOut
