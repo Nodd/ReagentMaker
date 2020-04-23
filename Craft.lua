@@ -150,11 +150,11 @@ function A.numToMake(reagentInfo, numReagentRecipeMakable)
 	local minMade, maxMade = C_TradeSkillUI.GetRecipeNumItemsProduced(reagentInfo.recipeID)
 	local meanMade = (minMade + maxMade) / 2
 	numRecipeToMake = floor(numReagentToMake / meanMade) -- floor() to not waste reagents
-	numRecipeToMake = max(numRecipeToMake, 1) -- Make at least one
+	numRecipeToMake = max(numRecipeToMake, 1) -- Make at least one recipe
 	if numRecipeToMake > numReagentRecipeMakable then
 		UIErrorsFrame:TryDisplayMessage(
 			LE_GAME_ERR_SPELL_FAILED_REAGENTS,
-			A.L["Unable to make enough reagent for one more recipe."],
+			A.L["Unable to make " .. numRecipeToMake .. " reagents for one more recipe."],
 			1, 0, 0)
 		numRecipeToMake = nil
 	end
