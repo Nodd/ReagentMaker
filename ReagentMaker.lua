@@ -65,6 +65,7 @@ function A:Initialize()
 					A.ProcessReagent(reagentButton)
 				end
 			end)
+		reagentButton:HookScript("OnMouseWheel", A.btnWheel)
 		reagentButton:HookScript("OnEnter", A.btnEntered)
 		reagentButton:HookScript("OnLeave", A.btnLeft)
 		--reagentButton.SplitStack = A.SplitStack
@@ -85,6 +86,15 @@ function A:Initialize()
 		label:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
 		label:Hide()
 		reagentButton.label = label
+
+		local label2 = reagentButton:CreateFontString(nil,"ARTWORK","GameFontHighlight")
+		label2:SetSize(100,20)
+		label2:SetPoint("BOTTOMRIGHT",reagentButton,"BOTTOMRIGHT",-2,3)
+		label2:SetJustifyH("RIGHT")
+		label2:SetJustifyV("BOTTOM")
+		label2:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+		label2:Hide()
+		reagentButton.makeLabel = label2
 	end -- for
 
 	-- Secondary Tooltip
@@ -112,11 +122,14 @@ end -- function
 ---------------------------------------------------
 -- Button hovering (entered)
 function A.btnEntered(reagentButton)
+	A.makeCount = 1
 	info = A.ReagentButtonInfo(reagentButton)
 
 	-- Highlight the icon
-	if info.recipeIDs then
+	if info.recipes then
 		reagentButton.textureHighlight:Show()
+		reagentButton.makeLabel:SetText(A.makeCount)
+		reagentButton.makeLabel:Show()
 	end
 
 	-- Tooltips
@@ -129,9 +142,17 @@ function A.btnEntered(reagentButton)
 	end
 end
 
+function A.btnWheel(reagentButton, direction)
+	A.makeCount = A.makeCount + direction
+	if A.makeCount < 1 then A.makeCount = 1 end
+	reagentButton.makeLabel:SetText(A.makeCount)
+end
+
 -- Button hovering (left)
-function A.btnLeft(btn)
-	btn.textureHighlight:Hide()
+function A.btnLeft(reagentButton)
+	A.makeCount = 1
+	reagentButton.textureHighlight:Hide()
+	reagentButton.makeLabel:Hide()
 	A.tooltipRecipe:Hide()
 end -- function
 
