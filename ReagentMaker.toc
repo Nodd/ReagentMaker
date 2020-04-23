@@ -1,4 +1,4 @@
-## Interface: 80100
+## Interface: 80300
 ## Title: ReagentMaker
 ## Author: Nodd
 ## Version: v1.2alpha0
