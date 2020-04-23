@@ -61,6 +61,7 @@ end
 
 -- Hide button
 function A.HideCampFireBtn()
+	if InCombatLockdown() then return end
 	if btn then
 		btn:Hide()
 		btn:UnregisterAllEvents()
@@ -69,6 +70,7 @@ end
 
 -- Show button if applicable
 function A.ManageCampFireBtn()
+	if InCombatLockdown() then return end
 	-- Display only if the tradeskill is Cooking
 	if C_TradeSkillUI.GetTradeSkillLine() ~= COOKING_ID then
 		if btn then btn:Hide(); btn:UnregisterAllEvents() end
