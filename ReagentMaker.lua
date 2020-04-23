@@ -79,10 +79,11 @@ function A:Initialize()
 
 		local label = reagentButton:CreateFontString(nil,"ARTWORK","GameFontHighlight")
 		label:SetSize(100,20)
-		label:SetPoint("TOPLEFT",reagentButton,"TOPLEFT",4,-4)
+		label:SetPoint("TOPLEFT",reagentButton,"TOPLEFT",2,-3)
 		label:SetJustifyH("LEFT")
 		label:SetJustifyV("TOP")
 		label:SetFont("Fonts\\FRIZQT__.TTF", 10, "OUTLINE")
+		label:Hide()
 		reagentButton.label = label
 	end -- for
 
