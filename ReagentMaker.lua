@@ -92,10 +92,6 @@ function A:Initialize()
 	A.tooltipRecipe:SetFrameStrata("TOOLTIP")
 	A.tooltipRecipe:Hide()
 
-	-- Used for the campfire button only
-	--A.EventsFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-	--A.EventsFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-
 	-- Button for enchanting directy on a scroll
 	A.LoadEnchantOnScroll()
 
@@ -204,76 +200,3 @@ function A:UpdateCounts()
 		end -- if
 	end -- for
 end -- function
-
-
-
-return;
-
-
-
---[[
-
-
-
-local SCAN_DELAY = 0.2
-local t_throttle = SCAN_DELAY
-local function throttleScan(self, t_elapsed)
-	t_throttle = t_throttle - t_elapsed
-	if t_throttle<0 then
-		self:SetScript("OnUpdate", nil)
-
-		-- Close the external window if the tradeskill changed
-		if A.currentTradeSkill ~= C_TradeSkillUI.GetTradeSkillLine() then
-			A.MenuFrame:Hide()
-		end
-		if C_TradeSkillUI.IsTradeSkillGuild() or C_TradeSkillUI.IsTradeSkillLinked() then
-			A.MenuFrame:Hide()
-			return
-		end
-
-		-- Scan availabe recipes
-		-- Rescan in case of problem
-		if not A:ScanSimpleRecipes() then
-			t_throttle = SCAN_DELAY
-			self:SetScript("OnUpdate", throttleScan)
-		end
-
-		-- Show makables reagents
-		A.updateCount_throttle()
-	end
-end
-
--- Show counts on buttons
-local CountThrottleFrame = CreateFrame("Frame")
-local COUNT_DELAY = 0.1
-local t_throttleCount = SCAN_DELAY
-
-local function throttleCount(self, t_elapsed)
-	t_throttle = t_throttle - t_elapsed
-	if t_throttle < 0 then
-		self:SetScript("OnUpdate", nil)
-
-		-- Show makables reagents
-		UpdateCounts(C_TradeSkillUI.GetTradeSkillLine())
-	end
-end
-function A.updateCount_throttle(self,event)
-	if not TradeSkillFrame or not TradeSkillFrame:IsVisible() or event=="TRADE_SKILL_CLOSE" then
-		CountThrottleFrame:UnregisterEvent("BAG_UPDATE")
-		t_throttleCount = 0
-		CountThrottleFrame:SetScript("OnUpdate", nil)
-		return
-	else
-		CountThrottleFrame:RegisterEvent("BAG_UPDATE")
-	end
-	t_throttleCount = SCAN_DELAY
-	CountThrottleFrame:SetScript("OnUpdate", throttleCount)
-
-	A.MenuFrame.updateCounts()
-end
-CountThrottleFrame:SetScript("OnEvent", A.updateCount_throttle)
-CountThrottleFrame:RegisterEvent("TRADE_SKILL_SHOW")
---CountThrottleFrame:RegisterEvent("TRADE_SKILL_UPDATE")
-CountThrottleFrame:RegisterEvent("TRADE_SKILL_CLOSE")
---hooksecurefunc("SelectTradeSkill",A.updateCount_throttle)
---]]
