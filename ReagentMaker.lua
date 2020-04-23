@@ -1,11 +1,16 @@
 local addonName, A = ...
 
+LibStub("AceAddon-3.0"):NewAddon(A, addonName, "AceConsole-3.0", "AceEvent-3.0")
+
+A.debug = false
+function A:DBG(...)
+	if A.debug then
+		A:Print(...)
+	end
+end
+
 -- @todo add support for cross tradeskill, like mining + forge/ingé
 -- @todo add support for dez ?
--- @todo scroll to the selected recipe on opening ?
--- @todo add a button to clear search ?
-
--- @bug Enter when choosing number of crafts
 
 ---------------------------------------------------
 -- Variables
@@ -24,32 +29,17 @@ local GameTooltip = GameTooltip
 ---------------------------------------------------
 -- Manage events and throttling
 ---------------------------------------------------
-A.EventsFrame = CreateFrame("Frame")
-A.EventsFrame:SetScript("OnEvent", function(self, event)
-	--print(event)
-	if event == "PLAYER_REGEN_DISABLED" then
-		A.HideCampFireBtn()
-
-	elseif event == "PLAYER_REGEN_ENABLED" then
-		A.ManageCampFireBtn()
-
-	elseif event == "TRADE_SKILL_LIST_UPDATE" then
-		A:ScanCurrentTradeskill()
-
-	elseif event == "UPDATE_TRADESKILL_RECAST" then
-		A:UpdateCounts()
-		A.ManageCampFireBtn()
-
-	elseif event == "TRADE_SKILL_SHOW" then
-		A:Initialize()
-		A.EventsFrame:UnregisterEvent("TRADE_SKILL_SHOW")
-	end -- if
-end) -- function
-A.EventsFrame:RegisterEvent("TRADE_SKILL_SHOW")
-A.EventsFrame:RegisterEvent("TRADE_SKILL_LIST_UPDATE")
-A.EventsFrame:RegisterEvent("UPDATE_TRADESKILL_RECAST")
---A.EventsFrame:RegisterAllEvents()
-
+A:RegisterEvent("PLAYER_REGEN_DISABLED", A.HideCampFireBtn)
+A:RegisterEvent("PLAYER_REGEN_ENABLED", A.ManageCampFireBtn)
+A:RegisterEvent("TRADE_SKILL_LIST_UPDATE", A.ScanCurrentTradeskill)
+A:RegisterEvent("UPDATE_TRADESKILL_RECAST", function()
+	A:UpdateCounts()
+	A.ManageCampFireBtn()
+end)
+A:RegisterEvent("TRADE_SKILL_SHOW", function()
+	A:Initialize()
+	A:UnregisterEvent("TRADE_SKILL_SHOW")
+end)
 
 ---------------------------------------------------
 -- Initialize
