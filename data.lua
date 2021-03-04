@@ -4,16 +4,12 @@ A.data = A.CommonData
 
 
 function A:ScanCurrentTradeskill()
-	--print("### SCAN ###")
 	if not A.IsPlayerTradeSkill() then return end
 
-	local recipeIDs = C_TradeSkillUI.GetAllRecipeIDs();
-	local recipeInfo = {};
-	for idx = 1, #recipeIDs do
-		C_TradeSkillUI.GetRecipeInfo(recipeIDs[idx], recipeInfo);
+	for _, recipeID in pairs(C_TradeSkillUI.GetAllRecipeIDs()) do
+		local recipeInfo = C_TradeSkillUI.GetRecipeInfo(recipeID);
 		if recipeInfo.learned then
 			recipeItemLink = C_TradeSkillUI.GetRecipeItemLink(recipeInfo.recipeID)
-			--print(recipeItemLink)
 			recipeItemID = A.link2ID(recipeItemLink)
 
 			addSpell = true

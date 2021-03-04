@@ -111,12 +111,11 @@ function A.numMakable(reagentItemID)
 	local craftableMin = 0
 	local craftableMax = 0
 	local isApprox = false
-	local recipeInfo = {}
 	for _, recipe in ipairs(recipes) do
 		-- number of times the recipe is makable
 		local numAvailable, minMade, maxMade
 		if recipe.recipeID then
-			C_TradeSkillUI.GetRecipeInfo(recipe.recipeID, recipeInfo)
+			local recipeInfo = C_TradeSkillUI.GetRecipeInfo(recipe.recipeID)
 			numAvailable = recipeInfo.numAvailable
 			minMade, maxMade = C_TradeSkillUI.GetRecipeNumItemsProduced(recipe.recipeID)
 			-- Hack for recipes from another tradeskill
